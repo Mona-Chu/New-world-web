@@ -26,6 +26,7 @@
             width: 100%; max-width: 800px;
             background: white; border: 10px solid #000;
             padding: 40px; position: relative;
+            box-shadow: 20px 20px 0px rgba(0,0,0,0.1);
         }
 
         header {
@@ -34,45 +35,47 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        h1 { font-size: 1.5rem; margin: 0; letter-spacing: -1px; text-transform: uppercase; }
+        h1 { font-size: 1.2rem; margin: 0; letter-spacing: -1px; text-transform: uppercase; }
         .status-badge { background: #000; color: #fff; padding: 5px 10px; font-size: 0.8rem; }
 
         /* Sections */
         .section { display: none; }
         .section.active { display: flex; flex-direction: column; }
 
-        /* Enrollment Form */
+        /* Phase 1: Enrollment */
         .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
-        label { font-size: 0.75rem; text-transform: uppercase; }
-        input { padding: 12px; border: 3px solid #000; font-weight: bold; }
+        label { font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
+        input { padding: 12px; border: 3px solid #000; font-weight: bold; outline: none; }
 
-        /* Quiz */
-        .question-text { background: #eee; padding: 20px; border-right: 15px solid #000; font-size: 1.4rem; margin-bottom: 20px; }
-        .option-btn { background: #000; color: #fff; border: none; padding: 20px; margin-bottom: 10px; cursor: pointer; text-align: left; font-weight: bold; text-transform: uppercase; }
-        .option-btn:hover { background: #333; }
+        /* Phase 2: Quiz */
+        .progress-bar { height: 5px; background: #eee; margin-bottom: 20px; position: relative; }
+        .progress-fill { height: 100%; background: #000; width: 0%; transition: 0.3s; }
+        .question-text { background: #eee; padding: 30px; border-right: 15px solid #000; font-size: 1.2rem; margin-bottom: 20px; min-height: 100px; line-height: 1.4; }
+        .option-btn { background: #000; color: #fff; border: none; padding: 15px 20px; margin-bottom: 10px; cursor: pointer; text-align: left; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
+        .option-btn:hover { background: #333; padding-left: 30px; }
 
-        /* ID Card Result */
+        /* Phase 3: ID Card Result */
         .id-card {
-            width: 100%; max-width: 600px; background: white;
+            width: 100%; max-width: 500px; background: white;
             border: 2px solid #000; position: relative;
             padding-bottom: 40px; box-shadow: 15px 15px 0px #000; margin: 20px auto;
         }
-        .id-header { background: #000; color: #fff; text-align: center; padding: 12px; font-size: 1.5rem; letter-spacing: 4px; text-transform: uppercase; }
+        .id-header { background: #000; color: #fff; text-align: center; padding: 12px; font-size: 1.2rem; letter-spacing: 4px; text-transform: uppercase; }
         .id-body { display: flex; padding: 25px; gap: 25px; }
-        .id-photo { width: 180px; height: 210px; border: 1px solid #000; background-size: cover; background-position: center; background-color: #eee; flex-shrink: 0; }
-        .id-info { font-size: 1rem; line-height: 1.6; flex-grow: 1; text-transform: uppercase; }
-        .info-label { font-weight: 900; display: block; font-size: 0.7rem; color: #666; margin-top: 8px; }
-        .info-value { border-bottom: 1px solid #000; min-height: 1.2em; }
+        .id-photo { width: 150px; height: 180px; border: 1px solid #000; background-size: cover; background-position: center; background-color: #eee; flex-shrink: 0; position: relative; overflow: hidden; }
+        .id-info { font-size: 0.9rem; line-height: 1.4; flex-grow: 1; text-transform: uppercase; }
+        .info-label { font-weight: 900; display: block; font-size: 0.65rem; color: #666; margin-top: 8px; }
+        .info-value { border-bottom: 1px solid #ddd; min-height: 1.2em; padding-bottom: 2px; }
 
-        /* Redaction Levels */
-        .mask { background: #000; color: #000; display: inline-block; user-select: none; }
-        .pixelated { filter: blur(8px) contrast(120%); }
-        .erased { background: #000 !important; }
+        /* Redaction Styling */
+        .mask { background: #000; color: #000; display: inline-block; user-select: none; padding: 0 2px; }
+        .id-photo.pixelated { filter: blur(10px) contrast(150%); }
+        .id-photo.erased { background: #000 !important; }
 
         .checkerboard {
-            height: 30px; width: 100%; position: absolute; bottom: 0;
+            height: 20px; width: 100%; position: absolute; bottom: 0;
             background-image: linear-gradient(45deg, #000 25%, transparent 25%), linear-gradient(-45deg, #000 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #000 75%), linear-gradient(-45deg, transparent 75%, #000 75%);
-            background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            background-size: 10px 10px;
         }
 
         .action-btn { background: #000; color: #fff; padding: 15px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
@@ -88,47 +91,100 @@
 
     <div id="section-enroll" class="section active">
         <div class="input-group">
-            <label>Full Name</label>
-            <input type="text" id="in-name" placeholder="Enter name...">
+            <label>Subject Identity (Full Name)</label>
+            <input type="text" id="in-name" placeholder="ENTER NAME...">
         </div>
         <div class="input-group">
-            <label>Date of Birth</label>
+            <label>Temporal Origin (Date of Birth)</label>
             <input type="date" id="in-dob">
         </div>
         <div class="input-group">
-            <label>Nationality</label>
-            <input type="text" id="in-nat" placeholder="Enter country...">
+            <label>Current Territory (Nationality)</label>
+            <input type="text" id="in-nat" placeholder="ENTER COUNTRY...">
         </div>
         <div class="input-group">
-            <label>Portrait Portrait</label>
+            <label>Visual Reference (Portrait)</label>
             <input type="file" id="in-photo" accept="image/*">
         </div>
-        <button class="action-btn" onclick="startQuiz()">Proceed to Verification</button>
+        <button class="action-btn" onclick="startQuiz()">Initialize Evaluation</button>
     </div>
 
     <div id="section-quiz" class="section">
+        <div class="progress-bar"><div id="p-fill" class="progress-fill"></div></div>
         <div id="q-container">
-            <p class="question-text" id="q-text">LOADING QUESTION...</p>
+            <p class="question-text" id="q-text">LOADING QUERIES...</p>
             <div id="options-grid" style="display:flex; flex-direction:column;"></div>
         </div>
     </div>
 
     <div id="section-result" class="section">
         <div id="id-output"></div>
-        <button class="action-btn" onclick="location.reload()" style="background:none; color:#000; border:1px solid #000; font-size:0.7rem; width:fit-content; margin: 20px auto;">Re-Initialize System</button>
+        <button class="action-btn" onclick="location.reload()" style="background:none; color:#000; border:1px solid #000; font-size:0.7rem; width:fit-content; margin: 20px auto; padding: 5px 15px;">Restart System</button>
     </div>
 </div>
 
 <script>
-    // User Data Storage
     let userData = { name: '', dob: '', nat: '', photo: '' };
     let totalScore = 0;
     let currentQuestion = 0;
 
     const questions = [
-        { q: "SELECT YOUR PREFERRED VIEWING STATE:", options: [{t:"TOTAL EXPOSURE", s:2}, {t:"STRATEGIC SHADOWS", s:1}, {t:"PERMANENT BLINDNESS", s:0}] },
-        { q: "THE SYSTEM IS:", options: [{t:"A NECESSARY TRUTH", s:2}, {t:"A PROTECTIVE FILTER", s:1}, {t:"A FABRICATED VOID", s:0}] },
-        { q: "IDENTITY IS DEFINED BY:", options: [{t:"EXTERNAL DOCUMENTATION", s:2}, {t:"PARTIAL RECOGNITION", s:1}, {t:"TOTAL ERASURE", s:0}] }
+        { 
+            q: "01. How much social attention do you perceive you receive in your daily life?", 
+            options: [
+                {t:"I am constantly under the spotlight", s:2}, 
+                {t:"I am noticed occasionally, but I prefer distance", s:1}, 
+                {t:"I am a ghost; I exist without being seen", s:0}
+            ] 
+        },
+        { 
+            q: "02. Which category best describes your professional nature?", 
+            options: [
+                {t:"Public-facing (Performance, Media, Sales)", s:2}, 
+                {t:"Backend / Support (Engineering, Editing, Research)", s:1}, 
+                {t:"Observer (Freelance, Hermit, Independent Critic)", s:0}
+            ] 
+        },
+        { 
+            q: "03. What is your ideal lifestyle environment?", 
+            options: [
+                {t:"The heart of a megacity, surrounded by the world", s:2}, 
+                {t:"A quiet neighborhood with a few trusted friends", s:1}, 
+                {t:"A remote shelter, disconnected from all networks", s:0}
+            ] 
+        },
+        { 
+            q: "04. How do you define the concept of being 'Invisible'?", 
+            options: [
+                {t:"A painful state of social abandonment", s:2}, 
+                {t:"A necessary mechanism for self-protection", s:1}, 
+                {t:"The ultimate state of absolute freedom", s:0}
+            ] 
+        },
+        { 
+            q: "05. When entering a room, what is your subconscious desire?", 
+            options: [
+                {t:"For everyone to stop talking and look at me", s:2}, 
+                {t:"To be noticed only by specific individuals", s:1}, 
+                {t:"To pass through like a transparent vapor", s:0}
+            ] 
+        },
+        { 
+            q: "06. What is the current state of your digital footprint?", 
+            options: [
+                {t:"High; searching my name reveals everything", s:2}, 
+                {t:"Restricted; visible only to specific circles", s:1}, 
+                {t:"Zero; no digital trace found", s:0}
+            ] 
+        },
+        { 
+            q: "07. What does 'being forgotten' represent to you?", 
+            options: [
+                {t:"The ultimate failure of existence", s:2}, 
+                {t:"A natural law that I accept", s:1}, 
+                {t:"A liberation; it is my primary goal", s:0}
+            ] 
+        }
     ];
 
     function startQuiz() {
@@ -138,7 +194,7 @@
         const photoFile = document.getElementById('in-photo').files[0];
 
         if(!name || !dob || !nat || !photoFile) {
-            alert("ALL DATA FIELDS REQUIRED.");
+            alert("SYSTEM REQUIRES COMPLETE DATA FOR ACCURATE EVALUATION.");
             return;
         }
 
@@ -146,7 +202,7 @@
         reader.onload = function(e) {
             userData = { name, dob, nat, photo: e.target.result };
             showSection('section-quiz');
-            document.getElementById('sys-status').innerText = "STATUS: VERIFYING";
+            document.getElementById('sys-status').innerText = "STATUS: ANALYZING";
             loadQuestion();
         };
         reader.readAsDataURL(photoFile);
@@ -155,6 +211,8 @@
     function loadQuestion() {
         const q = questions[currentQuestion];
         document.getElementById('q-text').innerText = q.q;
+        document.getElementById('p-fill').style.width = `${((currentQuestion)/questions.length)*100}%`;
+        
         const grid = document.getElementById('options-grid');
         grid.innerHTML = '';
         q.options.forEach(opt => {
@@ -173,7 +231,7 @@
 
     function finalizeID() {
         showSection('section-result');
-        document.getElementById('sys-status').innerText = "STATUS: COMPLETE";
+        document.getElementById('sys-status').innerText = "STATUS: CLASSIFIED";
         
         let level = 'C';
         let photoEffect = 'erased';
@@ -181,42 +239,47 @@
         let dobHTML = `<span class="mask">REDACTED</span>`;
         let natHTML = `<span class="mask">REDACTED</span>`;
 
-        if (totalScore >= 5) {
+        if (totalScore >= 11) {
             level = 'A';
             photoEffect = '';
             nameHTML = userData.name;
             dobHTML = userData.dob;
             natHTML = userData.nat;
-        } else if (totalScore >= 3) {
+        } else if (totalScore >= 6) {
             level = 'B';
             photoEffect = 'pixelated';
             nameHTML = userData.name.split(' ')[0] + ` <span class="mask">XXXXX</span>`;
             dobHTML = userData.dob.split('-')[0] + `-<span class="mask">XX-XX</span>`;
             natHTML = userData.nat;
-        }
+        } 
 
-        const randomID = `ID-${level}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const randomID = `VS-${level}-${Math.floor(100000 + Math.random() * 900000)}`;
 
         document.getElementById('id-output').innerHTML = `
             <div class="id-card">
-                <div class="id-header">Identification Card</div>
+                <div class="id-header">Visibility Passport</div>
                 <div class="id-body">
                     <div class="id-photo ${photoEffect}" style="background-image: url('${userData.photo}')"></div>
                     <div class="id-info">
-                        <span class="info-label">Name</span>
+                        <span class="info-label">Subject Name</span>
                         <div class="info-value">${nameHTML}</div>
-                        <span class="info-label">Date of Birth</span>
+                        <span class="info-label">Birth Record</span>
                         <div class="info-value">${dobHTML}</div>
-                        <span class="info-label">Access Level</span>
-                        <div class="info-value">LEVEL ${level}</div>
+                        <span class="info-label">Visibility Status</span>
+                        <div class="info-value" style="color:${level=='A'?'#000':(level=='B'?'#666':'#ff0000')}">LEVEL ${level}</div>
                         <span class="info-label">Nationality</span>
                         <div class="info-value">${natHTML}</div>
-                        <span class="info-label">ID Number</span>
-                        <div class="info-value">${randomID}</div>
+                        <span class="info-label">System Hash</span>
+                        <div class="info-value" style="font-family:monospace; font-size:0.7rem;">${randomID}</div>
                     </div>
                 </div>
                 <div class="checkerboard"></div>
             </div>
+            <p style="text-align:center; font-size:0.7rem; color:#666; margin-top:10px; text-transform:uppercase; letter-spacing:1px;">
+                ${level === 'A' ? 'Status: Absolute Exposure. Identity fully integrated.' : 
+                  level === 'B' ? 'Status: Filtered Presence. Identity markers restricted.' : 
+                                 'Status: Total Redaction. Identity successfully erased.'}
+            </p>
         `;
     }
 
