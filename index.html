@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Invisible / Visible</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* 整体容器 */
+.container {
+  position: relative;
+  font-size: 120px;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+  cursor: pointer; /* 鼠标悬停变为手型 */
+  user-select: none; /* 防止频繁点击选中文字 */
+}
+
+/* in 区域 */
+.in-wrapper {
+  position: relative;
+  width: 90px;
+  overflow: visible;
+}
+
+/* in 文字 */
+.in-text {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* Visible 文字 */
+.visible-text {
+  margin-left: 5px;
+}
+
+/* 贴纸 */
+.sticker {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 100px;
+  height: 120px;
+  background: black;
+  z-index: 2;
+  transform-origin: bottom left;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); /* 优化了撕开的曲线，更丝滑 */
+}
+
+/* 白色卷角 */
+.sticker::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 25px solid white;
+  border-top: 25px solid transparent;
+}
+
+/* 撕开后的状态 */
+.sticker.open {
+  transform: rotate(-30deg) translate(-50px, -40px);
+}
+
+/* 显示 in */
+.in-text.show {
+  opacity: 1;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container" id="mainTitle">
+  <div class="in-wrapper">
+    <span class="in-text" id="inText">in</span>
+    <div class="sticker" id="sticker"></div>
+  </div>
+
+  <span class="visible-text">Visible</span>
+</div>
+
+<script>
+const mainTitle = document.getElementById("mainTitle");
+const sticker = document.getElementById("sticker");
+const inText = document.getElementById("inText");
+
+// 监听整个标题的点击事件
+mainTitle.addEventListener("click", () => {
+  // 1. 触发动画
+  sticker.classList.add("open");
+  inText.classList.add("show");
+
+  // 2. 延迟跳转 (600毫秒，刚好等贴纸移开动画完成)
+  setTimeout(() => {
+    window.location.href = "page1.html";
+  }, 600); 
+});
+</script>
+
+</body>
+</html>

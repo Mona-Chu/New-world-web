@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CENTRAL VISIBILITY GATEWAY | INTEGRATED SYSTEM</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --grid-size: 25px;
+        }
+
+        * { box-sizing: border-box; font-family: "Arial Black", "Arial Bold", sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+                linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        #system-container {
+            width: 100%; max-width: 800px;
+            background: white; border: 10px solid #000;
+            padding: 40px; position: relative;
+        }
+
+        header {
+            border-bottom: 10px solid #000;
+            margin-bottom: 30px; padding-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        h1 { font-size: 1.5rem; margin: 0; letter-spacing: -1px; text-transform: uppercase; }
+        .status-badge { background: #000; color: #fff; padding: 5px 10px; font-size: 0.8rem; }
+
+        /* Sections */
+        .section { display: none; }
+        .section.active { display: flex; flex-direction: column; }
+
+        /* Enrollment Form */
+        .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        label { font-size: 0.75rem; text-transform: uppercase; }
+        input { padding: 12px; border: 3px solid #000; font-weight: bold; }
+
+        /* Quiz */
+        .question-text { background: #eee; padding: 20px; border-right: 15px solid #000; font-size: 1.4rem; margin-bottom: 20px; }
+        .option-btn { background: #000; color: #fff; border: none; padding: 20px; margin-bottom: 10px; cursor: pointer; text-align: left; font-weight: bold; text-transform: uppercase; }
+        .option-btn:hover { background: #333; }
+
+        /* ID Card Result */
+        .id-card {
+            width: 100%; max-width: 600px; background: white;
+            border: 2px solid #000; position: relative;
+            padding-bottom: 40px; box-shadow: 15px 15px 0px #000; margin: 20px auto;
+        }
+        .id-header { background: #000; color: #fff; text-align: center; padding: 12px; font-size: 1.5rem; letter-spacing: 4px; text-transform: uppercase; }
+        .id-body { display: flex; padding: 25px; gap: 25px; }
+        .id-photo { width: 180px; height: 210px; border: 1px solid #000; background-size: cover; background-position: center; background-color: #eee; flex-shrink: 0; }
+        .id-info { font-size: 1rem; line-height: 1.6; flex-grow: 1; text-transform: uppercase; }
+        .info-label { font-weight: 900; display: block; font-size: 0.7rem; color: #666; margin-top: 8px; }
+        .info-value { border-bottom: 1px solid #000; min-height: 1.2em; }
+
+        /* Redaction Levels */
+        .mask { background: #000; color: #000; display: inline-block; user-select: none; }
+        .pixelated { filter: blur(8px) contrast(120%); }
+        .erased { background: #000 !important; }
+
+        .checkerboard {
+            height: 30px; width: 100%; position: absolute; bottom: 0;
+            background-image: linear-gradient(45deg, #000 25%, transparent 25%), linear-gradient(-45deg, #000 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #000 75%), linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .action-btn { background: #000; color: #fff; padding: 15px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="system-container">
+    <header>
+        <h1>Visibility Gateway</h1>
+        <div class="status-badge" id="sys-status">STATUS: ENROLLMENT</div>
+    </header>
+
+    <div id="section-enroll" class="section active">
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="in-name" placeholder="Enter name...">
+        </div>
+        <div class="input-group">
+            <label>Date of Birth</label>
+            <input type="date" id="in-dob">
+        </div>
+        <div class="input-group">
+            <label>Nationality</label>
+            <input type="text" id="in-nat" placeholder="Enter country...">
+        </div>
+        <div class="input-group">
+            <label>Portrait Portrait</label>
+            <input type="file" id="in-photo" accept="image/*">
+        </div>
+        <button class="action-btn" onclick="startQuiz()">Proceed to Verification</button>
+    </div>
+
+    <div id="section-quiz" class="section">
+        <div id="q-container">
+            <p class="question-text" id="q-text">LOADING QUESTION...</p>
+            <div id="options-grid" style="display:flex; flex-direction:column;"></div>
+        </div>
+    </div>
+
+    <div id="section-result" class="section">
+        <div id="id-output"></div>
+        <button class="action-btn" onclick="location.reload()" style="background:none; color:#000; border:1px solid #000; font-size:0.7rem; width:fit-content; margin: 20px auto;">Re-Initialize System</button>
+    </div>
+</div>
+
+<script>
+    // User Data Storage
+    let userData = { name: '', dob: '', nat: '', photo: '' };
+    let totalScore = 0;
+    let currentQuestion = 0;
+
+    const questions = [
+        { q: "SELECT YOUR PREFERRED VIEWING STATE:", options: [{t:"TOTAL EXPOSURE", s:2}, {t:"STRATEGIC SHADOWS", s:1}, {t:"PERMANENT BLINDNESS", s:0}] },
+        { q: "THE SYSTEM IS:", options: [{t:"A NECESSARY TRUTH", s:2}, {t:"A PROTECTIVE FILTER", s:1}, {t:"A FABRICATED VOID", s:0}] },
+        { q: "IDENTITY IS DEFINED BY:", options: [{t:"EXTERNAL DOCUMENTATION", s:2}, {t:"PARTIAL RECOGNITION", s:1}, {t:"TOTAL ERASURE", s:0}] }
+    ];
+
+    function startQuiz() {
+        const name = document.getElementById('in-name').value;
+        const dob = document.getElementById('in-dob').value;
+        const nat = document.getElementById('in-nat').value;
+        const photoFile = document.getElementById('in-photo').files[0];
+
+        if(!name || !dob || !nat || !photoFile) {
+            alert("ALL DATA FIELDS REQUIRED.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            userData = { name, dob, nat, photo: e.target.result };
+            showSection('section-quiz');
+            document.getElementById('sys-status').innerText = "STATUS: VERIFYING";
+            loadQuestion();
+        };
+        reader.readAsDataURL(photoFile);
+    }
+
+    function loadQuestion() {
+        const q = questions[currentQuestion];
+        document.getElementById('q-text').innerText = q.q;
+        const grid = document.getElementById('options-grid');
+        grid.innerHTML = '';
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt.t;
+            btn.onclick = () => {
+                totalScore += opt.s;
+                currentQuestion++;
+                if(currentQuestion < questions.length) loadQuestion();
+                else finalizeID();
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function finalizeID() {
+        showSection('section-result');
+        document.getElementById('sys-status').innerText = "STATUS: COMPLETE";
+        
+        let level = 'C';
+        let photoEffect = 'erased';
+        let nameHTML = `<span class="mask">REDACTED</span>`;
+        let dobHTML = `<span class="mask">REDACTED</span>`;
+        let natHTML = `<span class="mask">REDACTED</span>`;
+
+        if (totalScore >= 5) {
+            level = 'A';
+            photoEffect = '';
+            nameHTML = userData.name;
+            dobHTML = userData.dob;
+            natHTML = userData.nat;
+        } else if (totalScore >= 3) {
+            level = 'B';
+            photoEffect = 'pixelated';
+            nameHTML = userData.name.split(' ')[0] + ` <span class="mask">XXXXX</span>`;
+            dobHTML = userData.dob.split('-')[0] + `-<span class="mask">XX-XX</span>`;
+            natHTML = userData.nat;
+        }
+
+        const randomID = `ID-${level}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        document.getElementById('id-output').innerHTML = `
+            <div class="id-card">
+                <div class="id-header">Identification Card</div>
+                <div class="id-body">
+                    <div class="id-photo ${photoEffect}" style="background-image: url('${userData.photo}')"></div>
+                    <div class="id-info">
+                        <span class="info-label">Name</span>
+                        <div class="info-value">${nameHTML}</div>
+                        <span class="info-label">Date of Birth</span>
+                        <div class="info-value">${dobHTML}</div>
+                        <span class="info-label">Access Level</span>
+                        <div class="info-value">LEVEL ${level}</div>
+                        <span class="info-label">Nationality</span>
+                        <div class="info-value">${natHTML}</div>
+                        <span class="info-label">ID Number</span>
+                        <div class="info-value">${randomID}</div>
+                    </div>
+                </div>
+                <div class="checkerboard"></div>
+            </div>
+        `;
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+</script>
+</body>
+</html>
